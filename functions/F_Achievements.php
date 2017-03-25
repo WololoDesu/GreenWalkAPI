@@ -62,3 +62,33 @@ $app->get(
         return $response;
     }
 );
+
+//Get user achievements
+$app->get(
+    "/achievements/users/{id:[0-9]+}",
+    function ($id) use ($app) {
+        $phql = "SELECT API\\Achievements.idAchievement as id, API\\Achievements.nom as nom,
+                 API\\Achievements.description as description, API\\Achievements.multiplicateur as multiplicateur 
+                 FROM API\\Achievements
+                 INNER JOIN API\\Obtenir ON API\\Obtenir.idAchievement = API\\Achievements.idAchievement
+                 WHERE API\\Obtenir.idUser = :id:";
+        $achievements = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "id" => $id,
+            ]
+        );
+        $data = [];
+        foreach ($achievements as $achievement) {
+            $data[] = [
+                "id" => $achievement->id,
+                "nom" => $achievement->nom,
+                "description" => $achievement->description,
+                "multiplicateur" => $achievement->multiplicateur,
+            ];
+        }
+        echo json_encode($data);
+    }
+);
+
+//Get user non unlocked achievement
