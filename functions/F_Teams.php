@@ -11,13 +11,13 @@ $app->get(
     "/teams",
     function () use ($app) {
         //Team query
-        $phql = "SELECT * FROM API\\Team ORDER BY nom";
+        $phql = "SELECT * FROM API\\Teams ORDER BY nom";
         $teams = $app->modelsManager->executeQuery($phql);
         $data = [];
         foreach ($teams as $team) {
             $data[] = [
                 "id" => $team->idTeam,
-                "name" => $team->nom,
+                "nom" => $team->nom,
                 "score" => $team->score,
             ];
         }
@@ -29,7 +29,7 @@ $app->get(
 $app->get(
     "/teams/{id:[0-9]+}",
     function ($id) use ($app) {
-        $phql = "SELECT * FROM API\\Team WHERE idTeam = :id:";
+        $phql = "SELECT * FROM API\\Teams WHERE idTeam = :id:";
         $team = $app->modelsManager->executeQuery(
             $phql,
             [
@@ -50,7 +50,7 @@ $app->get(
                     "status" => "FOUND",
                     "data" => [
                         "id" => $team->idTeam,
-                        "name" => $team->nom,
+                        "nom" => $team->nom,
                         "score" => $team->score,
                     ]
                 ]
@@ -70,7 +70,6 @@ $app->put(
             $phql,
             [
                 "id" => $id,
-                "name" => $team->nom,
                 "score" => $team->score,
             ]
         );
@@ -103,7 +102,7 @@ $app->put(
 
 //Get all user in a team
 $app->get(
-    "/teams/{id:[0-9]+}/all",
+    "/teams/{id:[0-9]+}/users",
     function ($id) use ($app) {
         $phql = "SELECT * FROM API\\Users WHERE idTeam = :id:";
         $users = $app->modelsManager->executeQuery(
@@ -121,6 +120,7 @@ $app->get(
                 "pseudo" => $user->pseudo,
                 "mail" => $user->mail,
                 "creationDate" => $user->creationDate,
+                "connexionDate" => $user->connexionDate,
                 "score" => $user->score,
             ];
         }

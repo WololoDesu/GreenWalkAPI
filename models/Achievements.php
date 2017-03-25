@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Bastien
- * Date: 25/03/2017
- * Time: 13:55
- */
 
 namespace API;
 
@@ -14,49 +8,40 @@ use Phalcon\Validation;
 use Phalcon\Validation\Validator\Uniqueness;
 use Phalcon\Validation\Validator\PresenceOf;
 
-class Transport extends Model
+class Achievements extends Model
 {
     public function validation()
     {
         $validator = new Validation();
 
-        //Vehicule name not null
+        //Achievement name not null
         $validator->add(
             "nom",
             new PresenceOf(
                 [
-                    "message" => "Vehicule name must be filled in",
+                    "message" => "Achievement name must be filled in",
                 ]
             )
         );
 
-        //Multiplicator not null
+        //Achievement mult not null
         $validator->add(
             "multiplicateur",
             new PresenceOf(
                 [
-                    "message" => "Multiplicator name must be filled in",
+                    "message" => "Achievement multiplicator must be filled in",
                 ]
             )
         );
-
+        //Achievement name not null
         $validator->add(
-            "tauxSauve",
+            "description",
             new PresenceOf(
                 [
-                    "message" => "Rate must be filled in",
+                    "message" => "Achievement desc must be filled in",
                 ]
             )
         );
 
-        //Vehicule name unique
-        $validator->add(
-            "nom",
-            new Uniqueness(
-                [
-                    "message" => "Vehicule name already exist",
-                ]
-            )
-        );
     }
 }

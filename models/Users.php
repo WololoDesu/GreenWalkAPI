@@ -74,22 +74,22 @@ class Users extends Model
             )
         );
 
+        //Connection date not null
+        $validator->add(
+            'connexionDate',
+            new PresenceOf(
+                [
+                    "message" => "Connection date must be filled in",
+                ]
+            )
+        );
+
         //Score not null
         $validator->add(
             'score',
             new PresenceOf(
                 [
                     "message" => "Score must be filled in",
-                ]
-            )
-        );
-
-        //idTeam must exist
-        $validator->add(
-            'idTeam',
-            new PresenceOf(
-                [
-                    "message" => "User must be in a team",
                 ]
             )
         );

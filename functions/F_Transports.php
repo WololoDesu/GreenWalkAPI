@@ -11,15 +11,15 @@ $app->get(
     "/transports",
     function () use ($app) {
         //User query
-        $phql = "SELECT * FROM API\\moyendetransport ORDER BY nom";
+        $phql = "SELECT * FROM API\\Transports ORDER BY nom";
         $trsprts = $app->modelsManager->executeQuery($phql);
         $data = [];
         foreach ($trsprts as $trsprt) {
             $data[] = [
                 "id" => $trsprt->idTransport,
-                "name" => $trsprt->nom,
-                "multiplicator" => $trsprt->multiplicateur,
-                "savedRate" => $trsprt->tauxSauve,
+                "nom" => $trsprt->nom,
+                "multiplicateur" => $trsprt->multiplicateur,
+                "tauxSave" => $trsprt->tauxSauve,
             ];
         }
         echo json_encode($data);
@@ -30,7 +30,7 @@ $app->get(
 $app->get(
     "/transports/{id:[0-9]+}",
     function ($id) use ($app) {
-        $phql = "SELECT * FROM API\\moyendetransport WHERE idTransport = :id:";
+        $phql = "SELECT * FROM API\\Transports WHERE idTransport = :id:";
         $trsprt = $app->modelsManager->executeQuery(
             $phql,
             [
@@ -51,9 +51,9 @@ $app->get(
                     "status" => "FOUND",
                     "data" => [
                         "id" => $trsprt->idTransport,
-                        "name" => $trsprt->nom,
-                        "multiplicator" => $trsprt->multiplicateur,
-                        "savedRate" => $trsprt->tauxSauve,
+                        "nom" => $trsprt->nom,
+                        "multiplicateur" => $trsprt->multiplicateur,
+                        "tauxSave" => $trsprt->tauxSauve,
                     ]
                 ]
             );

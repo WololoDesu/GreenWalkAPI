@@ -17,12 +17,14 @@ $app->get(
         foreach ($users as $user) {
             $data[] = [
                 "id" => $user->idUser,
-                "lastname" => $user->nom,
-                "firstname" => $user->prenom,
+                "nom" => $user->nom,
+                "prenom" => $user->prenom,
                 "pseudo" => $user->pseudo,
                 "mail" => $user->mail,
                 "creationDate" => $user->creationDate,
+                "connexionDate" => $user->connexionDate,
                 "score" => $user->score,
+                "idTeam" => $user->idTeam,
             ];
         }
         echo json_encode($data);
@@ -45,12 +47,14 @@ $app->get(
         foreach ($users as $user) {
             $data[] = [
                 "id" => $user->idUser,
-                "lastname" => $user->nom,
-                "firstname" => $user->prenom,
+                "nom" => $user->nom,
+                "prenom" => $user->prenom,
                 "pseudo" => $user->pseudo,
                 "mail" => $user->mail,
                 "creationDate" => $user->creationDate,
+                "connexionDate" => $user->connexionDate,
                 "score" => $user->score,
+                "idTeam" => $user->idTeam,
             ];
         }
         echo json_encode($data);
@@ -82,12 +86,14 @@ $app->get(
                     "status" => "FOUND",
                     "data" => [
                         "id" => $user->idUser,
-                        "lastname" => $user->nom,
-                        "firstname" => $user->prenom,
+                        "nom" => $user->nom,
+                        "prenom" => $user->prenom,
                         "pseudo" => $user->pseudo,
                         "mail" => $user->mail,
                         "creationDate" => $user->creationDate,
+                        "connexionDate" => $user->connexionDate,
                         "score" => $user->score,
+                        "idTeam" => $user->idTeam,
                     ]
                 ]
             );
@@ -96,23 +102,22 @@ $app->get(
     }
 );
 
-// Adds a new client
+// Adds a new user
 $app->post(
     "/users",
     function () use ($app) {
         $user = $app->request->getJsonRawBody();
-        $phql = "INSERT INTO API\\Users (nom, prenom, pseudo, mail, password, creationDate, score, idTeam)
-                VALUES (:nom:, :prenom:, :pseudo:, :mai:, :password:, :creationDate:, 0, :idTeam:)";
+        $phql = "INSERT INTO API\\Users (nom, prenom, pseudo, mail, password, creationDate, connexionDate,score)
+                VALUES (:nom:, :prenom:, :pseudo:, :mail:, :password:, :date:, :date:, 100)";
         $status = $app->modelsManager->executeQuery(
             $phql,
             [
-                "id" => $user->idUser,
-                "lastname" => $user->nom,
-                "firstname" => $user->prenom,
+                "nom" => $user->nom,
+                "prenom" => $user->prenom,
                 "pseudo" => $user->pseudo,
                 "mail" => $user->mail,
-                "creationDate" => $user->creationDate,
-                "score" => $user->score,
+                "password" => $user->password,
+                "date" => date("Y-m-d"),
             ]
         );
         // Create a response
@@ -121,7 +126,7 @@ $app->post(
         if ($status->success() === true) {
             // Change the HTTP status
             $response->setStatusCode(201, "Created");
-            $id = $status->getModel()->id;
+            $id = $status->getModel()->idUser;
             $response->setJsonContent(
                 [
                     "status" => "OK",
@@ -152,18 +157,18 @@ $app->put(
     "/users/{id:[0-9]+}",
     function ($id) use ($app) {
         $user = $app->request->getJsonRawBody();
-        $phql = "UPDATE API\\Users SET nom=:nom:, prenom=:prenom:, mail=:mail:, password=:password:, score=:scrore:
-                  WHERE idUser=:id:";
+        $phql = "UPDATE API\\Users SET nom=:nom:, prenom=:prenom:, mail=:mail:, password=:password:, score=:score:,
+                  idTeam=:idTeam: WHERE idUser=:id:";
         $status = $app->modelsManager->executeQuery(
             $phql,
             [
                 "id" => $id,
-                "lastname" => $user->nom,
-                "firstname" => $user->prenom,
-                "pseudo" => $user->pseudo,
+                "nom" => $user->nom,
+                "prenom" => $user->prenom,
                 "mail" => $user->mail,
-                "creationDate" => $user->creationDate,
+                "password" => $user->password,
                 "score" => $user->score,
+                "idTeam" => $user->idTeam,
             ]
         );
         // Create a response
