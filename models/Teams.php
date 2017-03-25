@@ -22,7 +22,7 @@ class Teams extends Model
                     "message" => "Team name must be filled in",
                 ]
             )
-        );
+        );//
 
         //Team score not null
         $validator->add(
