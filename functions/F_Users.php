@@ -57,7 +57,7 @@ $app->get(
     }
 );
 
-// Retrieves users based on primary key
+// Retrieves user based on primary key
 $app->get(
     "/users/{id:[0-9]+}",
     function ($id) use ($app) {

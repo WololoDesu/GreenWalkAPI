@@ -36,8 +36,9 @@ $di->set(
 // Create and bind the DI to the application
 $app = new Micro($di);
 
-// Example of how It's used : // A REMPLIR
+// Part included
 include("functions/F_Users.php");
+include("functions/F_Teams.php");
 
 
 // Not found function
