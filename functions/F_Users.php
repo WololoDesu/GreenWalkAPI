@@ -198,6 +198,46 @@ $app->put(
     }
 );
 
+//Modify password
+$app->put(
+    "/users/{id:[0-9]+}/changepass",
+    function ($id) use ($app) {
+        $user = $app->request->getJsonRawBody();
+        $phql = "UPDATE API\\Users SET password=:password: WHERE idUser=:id:";
+        $status = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "id" => $id,
+                "password" => $user->password,
+            ]
+        );
+        // Create a response
+        $response = new Response();
+        // Check if the insertion was successful
+        if ($status->success() === true) {
+            $response->setJsonContent(
+                [
+                    "status" => "OK"
+                ]
+            );
+        } else {
+            // Change the HTTP status
+            $response->setStatusCode(409, "Conflict");
+            $errors = [];
+            foreach ($status->getMessages() as $message) {
+                $errors[] = $message->getMessage();
+            }
+            $response->setJsonContent(
+                [
+                    "status" => "ERROR",
+                    "messages" => $errors,
+                ]
+            );
+        }
+        return $response;
+    }
+);
+
 // Deletes client based on primary key
 $app->delete(
     "/users/{id:[0-9]+}",

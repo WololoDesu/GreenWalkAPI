@@ -9,7 +9,7 @@ $loader = new Loader();
 
 $loader->registerNamespaces(
     [
-        "API" => __DIR__ ."/models/",
+        "API" => __DIR__ . "/models/",
     ]
 );
 
@@ -23,11 +23,11 @@ $di->set(
     function () {
         return new PdoMysql(
             [
-                "host"     => "localhost",
+                "host" => "localhost",
                 "username" => "root",
                 "password" => "",
-                "dbname"   => "greenwalk",
-				"charset"  => "utf8",
+                "dbname" => "greenwalk",
+                "charset" => "utf8",
             ]
         );
     }
@@ -42,6 +42,32 @@ include("functions/F_Teams.php");
 include("functions/F_Transports.php");
 include("functions/F_Achievements.php");
 
+//login
+$app->post(
+    "/login",
+    function () use ($app) {
+        $logs = $app->request->getJsonRawBody();
+        $phql = "SELECT idUser, password FROM API\\Users WHERE mail = :login: OR pseudo =:login:";
+        $user = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "login" => $logs->login,
+            ]
+        )->getFirst();
+        if ($user === false || $logs->password != $user->password) {
+            $data[] = [
+                "status" => false,
+                "reason" => "Incorrect login or password",
+            ];
+        } else {
+            $data[] = [
+                "status" => true,
+                "id" => $user->idUser,
+            ];
+        }
+        echo json_encode($data);
+    }
+);
 
 // Not found function
 $app->notFound(
