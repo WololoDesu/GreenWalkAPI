@@ -239,6 +239,46 @@ $app->put(
 );
 
 
+//Modify team
+$app->put(
+    "/users/{id:[0-9]+}/teams",
+    function ($id) use ($app) {
+        $user = $app->request->getJsonRawBody();
+        $phql = "UPDATE API\\Users SET idTeam=:idTeam: WHERE idUser=:id:";
+        $status = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "id" => $id,
+                "idTeam" => $user->idTeam,
+            ]
+        );
+        // Create a response
+        $response = new Response();
+        // Check if the insertion was successful
+        if ($status->success() === true) {
+            $response->setJsonContent(
+                [
+                    "status" => "OK"
+                ]
+            );
+        } else {
+            // Change the HTTP status
+            $response->setStatusCode(409, "Conflict");
+            $errors = [];
+            foreach ($status->getMessages() as $message) {
+                $errors[] = $message->getMessage();
+            }
+            $response->setJsonContent(
+                [
+                    "status" => "ERROR",
+                    "messages" => $errors,
+                ]
+            );
+        }
+        return $response;
+    }
+);
+
 //Modify score
 $app->put(
     "/users/{id:[0-9]+}/score",
