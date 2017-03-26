@@ -44,6 +44,7 @@ include("functions/F_Teams.php");
 include("functions/F_Transports.php");
 include("functions/F_Achievements.php");
 include("functions/F_Login.php");
+include("functions/F_Deplacements.php");
 
 // Not found function
 $app->notFound(
