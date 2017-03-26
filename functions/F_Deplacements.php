@@ -8,7 +8,7 @@ use Phalcon\Http\Response;
 
 // Retrieves all deplacement for an user
 $app->get(
-    "/deplacement/{id:[0-9]+}/all",
+    "/deplacement/{id:[0-9]+}",
     function ($id) use ($app) {
         //User query
         $phql = "SELECT * FROM API\\Deplacements WHERE idUser = :id:";
@@ -108,10 +108,11 @@ $app->post(
 
         $rqstMajScore = "UPDATE API\\Users SET score=:score: WHERE idUser=:id:";
 
-        $rqstTeamScore = "SELECT score FROM API\\Teams WHERE API\\Teams.idTeam=(SELECT API\\Users.idTeam FROM API\\Users WHERE API\\Users.idUser = :id:)";
+        $rqstTeamId = "SELECT idTeam FROM API\\Users WHERE idUser = :id:";
 
-        $rqstMajScoreTeam = "UPDATE API\\Teams SET score=:scoreTeam: 
-                              WHERE API\\Teams.idTeam=(SELECT API\\Users.idTeam FROM API\\Users WHERE API\\Users.idUser = :id:)";
+        $rqstTeamScore = "SELECT score FROM API\\Teams WHERE idTeam=:id:";
+
+        $rqstMajScoreTeam = "UPDATE API\\Teams SET score=:scoreTeam: WHERE idTeam=:id:";
 
         //Insert deplacement in database
         $status = $app->modelsManager->executeQuery(
@@ -155,20 +156,30 @@ $app->post(
         $newScore = floor($infos->tauxSauve * $depl->distance * $infos->mult * ($nbAchi + 1 / (log($nbAchi))));
         $updatedScore = $infos->score + $newScore;
 
+        //Get user team id
+        $idTeam = $app->modelsManager->executeQuery(
+          $rqstTeamId,
+            [
+                "id" => $depl->id,
+            ]
+        )->getFirst()->idTeam;
+
         //Insert new score in db
         $status1 = $app->modelsManager->executeQuery(
             $rqstMajScore,
             [
-                "id" => $depl->id,
+                "id" => $idTeam,
                 "score" => $updatedScore,
             ]
         );
 
+        $tempScore = $oldValueTeam + $newScore;
+
         $status2 = $app->modelsManager->executeQuery(
             $rqstMajScoreTeam,
             [
-                "id" => $depl->id,
-                "scoreTeam" => $oldValueTeam + $newScore,
+                "id" => $idTeam,
+                "scoreTeam" => $tempScore,
             ]
         );
 
