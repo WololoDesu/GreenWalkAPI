@@ -92,3 +92,26 @@ $app->get(
 );
 
 //Get user non unlocked achievement
+$app->get(
+    "/achievements/users/{id:[0-9]+}/locked",
+    function ($id) use ($app) {
+        $phql = "SELECT * FROM API\\Achievements WHERE API\\Achievements.idAchievement NOT IN (
+                    SELECT API\\Obtenir.idAchievement FROM API\\Obtenir WHERE idUser = :id:)";
+        $achievements = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "id" => $id,
+            ]
+        );
+        $data = [];
+        foreach ($achievements as $achievement) {
+            $data[] = [
+                "id" => $achievement->idAchievement,
+                "nom" => $achievement->nom,
+                "description" => $achievement->description,
+                "multiplicateur" => $achievement->multiplicateur,
+            ];
+        }
+        echo json_encode($data);
+    }
+);

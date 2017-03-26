@@ -238,6 +238,87 @@ $app->put(
     }
 );
 
+
+//Modify score
+$app->put(
+    "/users/{id:[0-9]+}/score",
+    function ($id) use ($app) {
+        $user = $app->request->getJsonRawBody();
+        $phql = "UPDATE API\\Users SET score=:score: WHERE idUser=:id:";
+        $status = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "id" => $id,
+                "score" => $user->score,
+            ]
+        );
+        // Create a response
+        $response = new Response();
+        // Check if the insertion was successful
+        if ($status->success() === true) {
+            $response->setJsonContent(
+                [
+                    "status" => "OK"
+                ]
+            );
+        } else {
+            // Change the HTTP status
+            $response->setStatusCode(409, "Conflict");
+            $errors = [];
+            foreach ($status->getMessages() as $message) {
+                $errors[] = $message->getMessage();
+            }
+            $response->setJsonContent(
+                [
+                    "status" => "ERROR",
+                    "messages" => $errors,
+                ]
+            );
+        }
+        return $response;
+    }
+);
+
+//Modify connexion date
+$app->put(
+    "/users/{id:[0-9]+}/date",
+    function ($id) use ($app) {
+        $user = $app->request->getJsonRawBody();
+        $phql = "UPDATE API\\Users SET connexionDate=:date: WHERE idUser=:id:";
+        $status = $app->modelsManager->executeQuery(
+            $phql,
+            [
+                "id" => $id,
+                "date" => date("Y-m-d"),
+            ]
+        );
+        // Create a response
+        $response = new Response();
+        // Check if the insertion was successful
+        if ($status->success() === true) {
+            $response->setJsonContent(
+                [
+                    "status" => "OK"
+                ]
+            );
+        } else {
+            // Change the HTTP status
+            $response->setStatusCode(409, "Conflict");
+            $errors = [];
+            foreach ($status->getMessages() as $message) {
+                $errors[] = $message->getMessage();
+            }
+            $response->setJsonContent(
+                [
+                    "status" => "ERROR",
+                    "messages" => $errors,
+                ]
+            );
+        }
+        return $response;
+    }
+);
+
 // Deletes client based on primary key
 $app->delete(
     "/users/{id:[0-9]+}",
@@ -274,3 +355,4 @@ $app->delete(
         return $response;
     }
 );
+
