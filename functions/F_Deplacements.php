@@ -98,20 +98,20 @@ $app->post(
 
         //Requete 1 : Ajout du déplacement
         $rqstDepl = "INSERT INTO API\\Deplacements (distance, temps, idUser, idTransport, co2Sauve, deplacementDate)
-                     VALUES (:distance:, :temps:, :id:, :idTransport:, :co2Sauve:, :DATE:)";
+                     VALUES (:distance:, :temps:, :id:, :idTransport:, :co2Sauve:, :date:)";
 
         $rqstGetInfo = "SELECT API\\Users.score AS score, API\\Transports.tauxSauve AS tauxSauve, API\\Transports.multiplicateur AS mult FROM API\\Users
                         INNER JOIN API\\Deplacements ON API\\Users.idUser = API\\Deplacements.idUser
                         INNER JOIN API\\Transports ON API\\Deplacements.idTransport = API\\Transports.idTransport
                         WHERE API\\Users.idUser = :id: AND API\\Transports.idTransport = :idTransport:";
-        $rqstGetAch = "SELECT CASE WHEN count(idAchievement) = 0 THEN 1 ELSE count(idAchievement) END AS c FROM API\\Obtenir WHERE idUser=:id:";
+        $rqstGetAch = "SELECT IF(count(idAchievement) = 0, 1, count(idAchievement)) as c FROM API\\Obtenir WHERE idUser=:id:";
 
         $rqstMajScore = "UPDATE API\\Users SET score=:score: WHERE idUser=:id:";
 
-        $rqstTeamScore = "SELECT score FROM API\\Teams WHERE idTeam=(SELECT idTeam FROM API\\Users WHERE idUsers = :id:)";
+        $rqstTeamScore = "SELECT score FROM API\\Teams WHERE API\\Teams.idTeam=(SELECT API\\Users.idTeam FROM API\\Users WHERE API\\Users.idUser = :id:)";
 
-        $rqstMajScoreTeam = "UPDATE API\\Team SET score=:scoreTeam: 
-                              WHERE idTeam=(SELECT idTeam FROM API\\Users WHERE idUser = :id:)";
+        $rqstMajScoreTeam = "UPDATE API\\Teams SET score=:scoreTeam: 
+                              WHERE API\\Teams.idTeam=(SELECT API\\Users.idTeam FROM API\\Users WHERE API\\Users.idUser = :id:)";
 
         //Insert deplacement in database
         $status = $app->modelsManager->executeQuery(
@@ -142,8 +142,17 @@ $app->post(
             ]
         )->getFirst()->c;
 
+        //Maj team score
+        $oldValueTeam = $app->modelsManager->executeQuery(
+            $rqstTeamScore,
+            [
+                "id" => $depl->id,
+            ]
+        )->getFirst()->score;
+
+
         //Calculate score
-        $newScore = $infos->tauxSauve * $depl->distance * $infos->mult * ($nbAchi + 1 / (floor(log($nbAchi))));
+        $newScore = floor($infos->tauxSauve * $depl->distance * $infos->mult * ($nbAchi + 1 / (log($nbAchi))));
         $updatedScore = $infos->score + $newScore;
 
         //Insert new score in db
@@ -155,26 +164,11 @@ $app->post(
             ]
         );
 
-        //Maj team score
-        $teamScore = $app->modelsManager->executeQuery(
-            $rqstTeamScore,
-            [
-                "id" => $depl->id,
-            ]
-        )->getFirst()->score;
-
-        $oldValueTeam = $app->modelsManager->executeQuery(
-            $rqstTeamScore,
-            [
-                "id" => $depl->id,
-            ]
-        )->getFirst()->score;
-
-        $tstatus2 = $app->modelsManager->executeQuery(
+        $status2 = $app->modelsManager->executeQuery(
             $rqstMajScoreTeam,
             [
                 "id" => $depl->id,
-                "scoreTeam" => $oldValueTeam + $teamScore,
+                "scoreTeam" => $oldValueTeam + $newScore,
             ]
         );
 
@@ -189,6 +183,10 @@ $app->post(
                 [
                     "status" => "OK",
                     "data" => $id,
+                    "scoreBefore" => $infos->score,
+                    "newScore" => $newScore,
+                    "scoreAfter" => $updatedScore,
+                    "scoreTeam" => $oldValueTeam + $newScore,
                 ]
             );
         } else {
